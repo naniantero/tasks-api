@@ -1,0 +1,9 @@
+{
+    "typeCheckingMode": "basic",
+    "reportMissingTypeStubs": false,
+    "reportMissingParameterType": true,
+    "reportMissingReturnType": true,
+    "reportUntypedFunctionDecorator": true,
+    "reportIncompatibleMethodOverride": true,
+    "pythonVersion": "3.10"
+  }
