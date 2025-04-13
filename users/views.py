@@ -1,57 +1,47 @@
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportOptionalMemberAccess=false
 import uuid
+from urllib.request import Request
 
+from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import Group, GroupMembership, User
-from users.serializers import GroupSerializer, JoinGroupSerializer
-from users.service import join_group
+from users.models import Group
+from users.serializers import (CustomTokenObtainPairSerializer,
+                               GroupSerializer, JoinGroupSerializer,
+                               RegisterAdminSerializer)
+from users.service import join_group, register_admin_and_create_group
+
+User = get_user_model()
 
 
-class CreateGroupView(APIView):
+@method_decorator(csrf_exempt, name='dispatch')
+class RegisterAdminView(APIView):
+    permission_classes = []
+
     def post(self, request: Request) -> Response:
-        group_name = request.data.get('group_name')
-        admin_name = request.data.get('admin_name')
+        serializer = RegisterAdminSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not group_name or not admin_name:
-            return Response({'error': 'group_name and admin_name are required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create the group
-        group = Group.objects.create(name=group_name)
-
-        # Create the admin user (with a generated username/email for now)
-        user = User.objects.create(
-            username=f"admin_{uuid.uuid4().hex[:8]}",
-            email=f"{uuid.uuid4().hex[:8]}@example.com",
-            first_name=admin_name
-        )
-
-        # Attach user to group as admin
-        GroupMembership.objects.create(
-            user=user,
-            group=group,
-            role='admin'
-        )
-
-        return Response({
-            'group_id': str(group.id),
-            'admin_user_id': user.id,
-            'admin_username': user.username
-        }, status=status.HTTP_201_CREATED)
+        username = serializer.validated_data.get("username")
+        res = register_admin_and_create_group(username)
+        return Response(res, status=status.HTTP_201_CREATED)
 
 
 class GroupDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer()
+    serializer_class = GroupSerializer
 
 
 class JoinGroupView(APIView):
-    def post(self, request: Request, group_id: int):
+    def post(self, request: Request, group_id: uuid.UUID) -> Response:
         serializer = JoinGroupSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -70,3 +60,7 @@ class JoinGroupView(APIView):
             'username': user.username,
             'group_id': str(group_id)
         }, status=status.HTTP_201_CREATED)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer  # type: ignore

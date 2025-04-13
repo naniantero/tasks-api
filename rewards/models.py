@@ -32,5 +32,5 @@ class RewardInstance(models.Model):
         default='pending'
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.template.title} for {self.assignee.email or self.assignee.username} on {self.date}"

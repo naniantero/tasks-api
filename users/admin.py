@@ -1,14 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from users.models import User
 
-from .models import User
 
-
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(BaseUserAdmin):  # type: ignore # runtime safe
     model = User
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ('Extra Info', {'fields': ('credits')}),
-    )  # type: ignore
+    fieldsets = BaseUserAdmin.fieldsets + (  # type: ignore
+        ('Extra Info', {'fields': ('credits',)}),
+    )
 
 
 admin.site.register(User, UserAdmin)

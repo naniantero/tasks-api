@@ -1,12 +1,10 @@
 from django.urls import path
-from tasks.views import CreateTaskView
+from tasks.views import CreateTaskTemplateView
 
-PATHS = {
-    'create_task': 'create/',
-}
-app_name = "users"
+
+app_name = "tasks"
 
 urlpatterns = [
-    path(PATHS['create_task'],
-         CreateTaskView.as_view(), name="create-task"),
+    path('create',
+         CreateTaskTemplateView.as_view(), name="create-task"),
 ]

@@ -1,9 +1,9 @@
 from .models import RewardTemplate
 
 
-def create_reward(name: str) -> RewardTemplate:
+def create_reward(title: str) -> RewardTemplate:
     """
     Create a new reward in the database.
     """
-    reward = RewardTemplate.objects.create(name=name)
+    reward = RewardTemplate.objects.create(title=title)
     return reward

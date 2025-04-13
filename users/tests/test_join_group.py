@@ -1,18 +1,22 @@
 # pyright: reportAttributeAccessIssue=false
 
+from typing import Any, Dict, cast
+
 from django.urls import reverse
-from rest_framework.test import APITestCase
 from rest_framework import status
-from users.models import Group, User, GroupMembership
+from rest_framework.test import APITestCase
+
+from users.models import Group, GroupMembership, User
 
 
 class JoinGroupTests(APITestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.group = Group.objects.create(name='Test Group')
-        self.url = reverse('users:join-group', kwargs={'group_id': self.group.id})
+        self.url = reverse('users:join-group',
+                           kwargs={'group_id': self.group.id})
         self.device_id = 'device_abc123'
 
-    def test_join_group_with_existing_device_id_returns_same_user(self):
+    def test_join_group_with_existing_device_id_returns_same_user(self) -> None:
         # Create initial user for this device
         existing_user = User.objects.create(
             username='existing_user',
@@ -35,9 +39,12 @@ class JoinGroupTests(APITestCase):
         response = self.client.post(self.url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.filter(device_id=self.device_id).count(), 1)
+        self.assertEqual(User.objects.filter(
+            device_id=self.device_id).count(), 1)
 
-        returned_user_id = response.data.get('user_id')
+        data = cast(Dict[str, Any], response.data)
+        returned_user_id = data.get("user_id")
+        self.assertEqual(returned_user_id, existing_user.id)
         self.assertEqual(returned_user_id, existing_user.id)
 
         # Check that membership still exists

@@ -19,6 +19,6 @@ class CreateRewardView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        reward_name: str = serializer.validated_data["name"]  # type: ignore
+        reward_name: str = serializer.validated_data["name"]
         reward = create_reward(reward_name)
         return Response(RewardSerializer(reward).data, status=status.HTTP_201_CREATED)

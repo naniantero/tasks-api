@@ -9,7 +9,7 @@ class Group(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -29,18 +29,19 @@ class GroupMembership(models.Model):
     class Meta:
         unique_together = ('user', 'group')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.username} in {self.group.name} as {self.role}"
 
 
 class User(AbstractUser):
+    username = models.CharField(
+        max_length=150, unique=True, blank=False, null=False)
     email = models.EmailField(unique=True)
     credits = models.PositiveIntegerField(default=0)
-    device_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    device_id = models.CharField(
+        max_length=100, blank=True, null=True, unique=True)
 
-    USERNAME_FIELD = 'email'
-    # username is still required, but email is the login
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = 'username'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.email or self.username
