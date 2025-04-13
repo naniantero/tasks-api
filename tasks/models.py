@@ -1,9 +1,9 @@
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownMemberType=false
 
+from django.conf import settings
 from django.db import models
-from django.conf import settings  # <- This is the correct way to get custom User
-# No need to import User directly
+from django.utils.timezone import now
 
 
 class TaskTemplate(models.Model):
@@ -11,6 +11,7 @@ class TaskTemplate(models.Model):
     description = models.TextField(blank=True)
     credits = models.PositiveIntegerField(default=0)
     priority = models.PositiveIntegerField(default=0)
+    date = models.DateTimeField(default=now)
     interval = models.CharField(
         max_length=10, default='daily')  # daily, weekly, custom
     daily_quota = models.PositiveIntegerField(default=0)
@@ -26,8 +27,8 @@ class TaskInstance(models.Model):
     template = models.ForeignKey(
         TaskTemplate, on_delete=models.CASCADE, related_name='instances')
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='task_instances')
-    date = models.DateField()
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='task_instances',    null=True,
+        blank=True)
     status = models.CharField(
         max_length=10,
         choices=[
@@ -39,4 +40,4 @@ class TaskInstance(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.template.title} for {self.assignee.username} on {self.date}"
+        return f"{self.template.title}: Created: {self.created_at}, Status: {self.status}. Template ID: {self.template.id}"
