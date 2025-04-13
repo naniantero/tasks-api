@@ -18,26 +18,12 @@ class TaskTemplateSerializer(serializers.ModelSerializer):
 
 
 class TaskInstanceSerializer(serializers.ModelSerializer):
+    template = TaskTemplateSerializer(read_only=True)
     class Meta:
         model = TaskInstance
-        fields = ['template', 'assignee', 'date', 'status']
+        fields = ['template', 'assignee', 'status', 'created_at', 'template']
 
     def validate_template(self, value: TaskTemplate) -> TaskTemplate:
         if not isinstance(value, TaskTemplate):
             raise serializers.ValidationError("Invalid task template.")
-        return value
-
-class AssignTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TaskInstance
-        fields = ['user_id', 'task_instance_id']
-
-    def validate_user_id(self, value: int) -> int:
-        if not isinstance(value, int):
-            raise serializers.ValidationError("Invalid user ID.")
-        return value
-    
-    def validate_task_instance_id(self, value: str) -> str:
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Invalid task ID.")
         return value

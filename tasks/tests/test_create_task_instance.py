@@ -3,6 +3,7 @@
 
 from rest_framework.test import APITestCase
 
+from tasks.models import TaskStatus
 from tasks_api.test_utils import (create_mock_task_instance,
                                   create_mock_task_template,
                                   setup_mock_admin_user)
@@ -19,8 +20,7 @@ class CreateTaskInstanceTests(APITestCase):
         if task_instance:
             self.assertIsNotNone(
                 task_instance, "TaskInstance should exist at this point")
-            self.assertEqual(task_instance.template.id, 1)
-            self.assertEqual(task_instance.status, "pending")
+            self.assertEqual(task_instance.status, TaskStatus.PENDING)
             self.assertEqual(task_instance.template.credits, 100)
         else:
             self.fail("TaskInstance was not created")

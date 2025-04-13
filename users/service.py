@@ -93,3 +93,19 @@ def generate_invite_url(group_id: str, name: str) -> str:
     token.set_exp(from_time=now(), lifetime=INVITE_TOKEN_EXPIRY)
     base_url = reverse('users:accept-invite')
     return f"{base_url}?token={str(token)}"
+
+
+def get_user_by_id(user_id: int) -> User | None:
+    try:
+        return User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return None
+
+
+def deposit_credits(user_id: int, credits: int) -> bool:
+    user = get_user_by_id(user_id)
+    if not user:
+        return False
+    user.credits += credits
+    user.save()
+    return True

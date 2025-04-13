@@ -6,6 +6,13 @@ from django.db import models
 from django.utils.timezone import now
 
 
+class TaskStatus(models.TextChoices):
+    PENDING = 'pending', 'Pending'
+    COMPLETED = 'completed', 'Completed'
+    EXPIRED = 'expired', 'Expired',
+    PENDING_REVIEW = 'pending_review', 'Pending Review'
+
+
 class TaskTemplate(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -30,13 +37,9 @@ class TaskInstance(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='task_instances',    null=True,
         blank=True)
     status = models.CharField(
-        max_length=10,
-        choices=[
-            ('pending', 'Pending'),
-            ('completed', 'Completed'),
-            ('expired', 'Expired')
-        ],
-        default='pending'
+        max_length=32,
+        choices=TaskStatus.choices,
+        default=TaskStatus.PENDING,
     )
 
     def __str__(self) -> str:
