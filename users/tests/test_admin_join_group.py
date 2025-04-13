@@ -9,10 +9,10 @@ from rest_framework.test import APITestCase
 from users.models import Group, GroupMembership, User
 
 
-class JoinGroupTests(APITestCase):
+class AdminJoinGroupTests(APITestCase):
     def setUp(self) -> None:
         self.group = Group.objects.create(name='Test Group')
-        self.url = reverse('users:join-group',
+        self.url = reverse('users:admin-join-group',
                            kwargs={'group_id': self.group.id})
         self.device_id = 'device_abc123'
 

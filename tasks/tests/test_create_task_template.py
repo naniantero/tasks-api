@@ -4,16 +4,16 @@
 from rest_framework.test import APITestCase
 
 from tasks.models import TaskTemplate
-from tasks_api.test_utils import create_task_template, setup_admin_user
+from tasks_api.test_utils import create_mock_task_template, setup_mock_admin_user
 
 
 class CreateTaskTemplateTests(APITestCase):
     def setUp(self) -> None:
-        self.admin = setup_admin_user(self.client, username="parent1")
+        self.admin = setup_mock_admin_user(self.client, username="parent1")
         self.group_id = self.admin["group_id"]
 
     def test_create_task_template(self) -> None:
-        response = create_task_template(self.client)
+        response = create_mock_task_template(self.client)
         item = TaskTemplate.objects.first()
 
         if item:

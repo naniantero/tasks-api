@@ -36,7 +36,7 @@ class GroupMembership(models.Model):
 class User(AbstractUser):
     username = models.CharField(
         max_length=150, unique=True, blank=False, null=False)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True) # type: ignore
     credits = models.PositiveIntegerField(default=0)
     device_id = models.CharField(
         max_length=100, blank=True, null=True, unique=True)

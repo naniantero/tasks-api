@@ -3,13 +3,14 @@ import uuid
 from datetime import timedelta
 from typing import Any, Dict
 
+from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken, Token
 
 from users.models import Group, GroupMembership, User
 
-JOIN_TOKEN_EXPIRY = timedelta(days=3)
+INVITE_TOKEN_EXPIRY = timedelta(days=3)
 
 
 def register_admin_and_create_group(username: str) -> Dict[str, Any]:
@@ -85,17 +86,10 @@ def join_group_with_invite(token: Token) -> User | None:
     return User.objects.get(id=user.id)
 
 
-def generate_invite_link(group_id: str, name: str) -> str:
-    """
-    Generate an invite link for a group.
-    """
-    token = _generate_invite_token(group_id, name)
-    return f"https://example.com/join/{group_id}/{token}/"
-
-
-def _generate_invite_token(group_id: str, name: str) -> str:
+def generate_invite_url(group_id: str, name: str) -> str:
     token = AccessToken()
-    token['group_id'] = group_id
+    token['group_id'] = str(group_id)
     token['name'] = name
-    token.set_exp(from_time=now(), lifetime=JOIN_TOKEN_EXPIRY)
-    return str(token)
+    token.set_exp(from_time=now(), lifetime=INVITE_TOKEN_EXPIRY)
+    base_url = reverse('users:accept-invite')
+    return f"{base_url}?token={str(token)}"

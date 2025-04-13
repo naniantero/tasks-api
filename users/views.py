@@ -14,15 +14,19 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import Group
 from users.serializers import (CustomTokenObtainPairSerializer,
-                               GroupSerializer, JoinGroupSerializer, JoinGroupWithInviteSerializer,
+                               GroupSerializer, JoinGroupSerializer,
+                               AcceptInviteSerializer,
+                               GetInviteUrlSerializer,
                                RegisterAdminSerializer)
-from users.service import admin_join_group, join_group_with_invite, register_admin_and_create_group
+from users.service import (admin_join_group, generate_invite_url,
+                           join_group_with_invite,
+                           register_admin_and_create_group)
 
 User = get_user_model()
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RegisterAdminView(APIView):
+class AdminRegisterView(APIView):
     permission_classes = []
 
     def post(self, request: Request) -> Response:
@@ -62,9 +66,22 @@ class AdminJoinGroupView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
-class JoinGroupWithInviteView(APIView):
+class GetInviteUrlView(APIView):
     def post(self, request: Request) -> Response:
-        serializer = JoinGroupWithInviteSerializer(data=request.data)
+        serializer = GetInviteUrlSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        group_id = serializer.validated_data.get("group_id")
+        name = serializer.validated_data.get("name")
+
+        url = generate_invite_url(group_id, name)
+        return Response({'invite_url': url}, status=status.HTTP_200_OK)
+
+
+class AcceptInviteView(APIView):
+    def post(self, request: Request) -> Response:
+        serializer = AcceptInviteSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

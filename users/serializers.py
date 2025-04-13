@@ -19,8 +19,6 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
         if not value.strip():
             raise serializers.ValidationError("Username cannot be empty.")
         return value
-    
-
 
 
 class JoinGroupSerializer(serializers.Serializer):
@@ -33,13 +31,15 @@ class JoinGroupSerializer(serializers.Serializer):
             raise serializers.ValidationError("Device ID cannot be blank.")
         return value
 
-class JoinGroupWithInviteSerializer(serializers.Serializer):
+
+class AcceptInviteSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
 
     def validate_token(self, value: str) -> str:
         if not value.strip():
             raise serializers.ValidationError("Token cannot be blank.")
         return value
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -80,3 +80,19 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'name', 'created_at']
+
+class GetInviteUrlSerializer(serializers.Serializer):
+    group_id = serializers.UUIDField(required=True)
+    name = serializers.CharField(required=True)
+
+    def validate_group_id(self, value: UUID) -> UUID:
+        try:
+            Group.objects.get(id=value)
+        except Group.DoesNotExist:
+            raise serializers.ValidationError("Group not found.")
+        return value
+    
+    def validate_name(self, value: str) -> str:
+        if not value.strip():
+            raise serializers.ValidationError("Name cannot be empty.")
+        return value
